@@ -1,6 +1,6 @@
-package com.telus.demo.dao;
+package com.telus.noteapp.dao;
 
-import com.telus.demo.modal.Note;
+import com.telus.noteapp.modal.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.telus.demo.exception;
+package com.telus.noteapp.exception;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
