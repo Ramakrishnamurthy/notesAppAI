@@ -1,10 +1,9 @@
-package com.telus.demo.service;
+package com.telus.noteapp.service;
 
-import com.telus.demo.dao.NotesRepository;
-import com.telus.demo.exception.NoteNotFoundException;
-import com.telus.demo.modal.Note;
+import com.telus.noteapp.dao.NotesRepository;
+import com.telus.noteapp.exception.NoteNotFoundException;
+import com.telus.noteapp.modal.Note;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -60,9 +59,16 @@ public class NotesService {
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
 
-        note.setSubject(noteDetails.getSubject());
-        note.setDescription(noteDetails.getDescription());
+        if (noteDetails.getSubject() != null) {
+            note.setSubject(noteDetails.getSubject());
+        }
+        if (noteDetails.getDescription() != null) {
+            note.setDescription(noteDetails.getDescription());
+        }
         note.setTimestampUpdated(LocalDateTime.now());  // Updating timestamp
+        if (noteDetails.getLikes() > 0) {
+            note.setLikes(noteDetails.getLikes());
+        }
         Note updatedNote = noteRepository.save(note);
         log.info("Note with ID {} modified successfully", updatedNote.getNoteId());
         return updatedNote;
