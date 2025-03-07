@@ -1,14 +1,15 @@
-package com.telus.demo.service;
+package com.telus.noteapp.service;
 
-import com.telus.demo.dao.NotesRepository;
-import com.telus.demo.modal.Note;
+import com.telus.noteapp.dao.NotesRepository;
+import com.telus.noteapp.exception.NoteNotFoundException;
+import com.telus.noteapp.modal.Note;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,7 +89,8 @@ public class NotesServiceTest {
 
         when(notesRepository.findById(noteId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> notesService.deleteNote(noteId));
+//        assertThrows(ResponseStatusException.class, () -> notesService.deleteNote(noteId));
+        assertThrows(NoteNotFoundException.class, () -> notesService.deleteNote(noteId));
     }
 
     @Test
@@ -127,7 +129,8 @@ public class NotesServiceTest {
 
         when(notesRepository.findById(noteId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> notesService.getNoteById(noteId));
+//        assertThrows(ResponseStatusException.class, () -> notesService.getNoteById(noteId));
+        assertThrows(NoteNotFoundException.class, () -> notesService.getNoteById(noteId));
     }
 
     @Test
@@ -233,5 +236,77 @@ public class NotesServiceTest {
         assertNotNull(allNotes);
         assertEquals(2, allNotes.size());
         verify(notesRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetTopLikedNotes() {
+        // Arrange
+        List<Note> notes = Arrays.asList(
+                Note.builder().noteId(1L).subject("Note 1").description("Description 1").likes(10).build(),
+                Note.builder().noteId(1L).subject("Note 2").description("Description 2").likes(5).build(),
+                Note.builder().noteId(1L).subject("Note 3").description("Description 3").likes(3).build()
+        );
+        when(notesRepository.findAll()).thenReturn(notes);
+
+        // Act
+        List<Note> topLikedNotes = notesService.getTopLikedNotes();
+
+        // Assert
+        assertEquals(3, topLikedNotes.size());
+        assertEquals(10, topLikedNotes.get(0).getLikes()); // Note with 10 likes should be first
+        assertEquals(5, topLikedNotes.get(1).getLikes()); // Note with 5 likes should be second
+        assertEquals(3, topLikedNotes.get(2).getLikes()); // Note with 3 likes should be third
+    }
+
+    @Test
+    public void testBoostLikes() {
+        // Arrange
+        Long noteId = 2L;
+        Note note2 = Note.builder().noteId(1L).subject("Note 2").description("Description 2").likes(5).build();
+        when(notesRepository.findById(noteId)).thenReturn(Optional.of(note2));
+        when(notesRepository.save(note2)).thenReturn(note2);
+
+        // Act
+        Note updatedNote = notesService.boostLikes(noteId);
+
+        // Assert
+        assertEquals(15, updatedNote.getLikes()); // Likes should increase by 10
+        verify(notesRepository, times(1)).save(note2); // Verify that save was called once
+    }
+
+    @Test
+    public void testBoostLikes_NoteNotFound() {
+        // Arrange
+        Long noteId = 4L; // Non-existing note
+        when(notesRepository.findById(noteId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NoteNotFoundException.class, () -> notesService.boostLikes(noteId));
+    }
+
+    @Test
+    public void testResetLikes() {
+        // Arrange
+        Long noteId = 1L;
+        Note note1 = Note.builder().noteId(1L).subject("Note 1").description("Description 1").likes(10).build();
+        when(notesRepository.findById(noteId)).thenReturn(Optional.of(note1));
+        when(notesRepository.save(note1)).thenReturn(note1);
+
+        // Act
+        Note updatedNote = notesService.resetLikes(noteId);
+
+        // Assert
+        assertEquals(0, updatedNote.getLikes()); // Likes should be reset to 0
+        verify(notesRepository, times(1)).save(note1); // Verify that save was called once
+    }
+
+    @Test
+    public void testResetLikes_NoteNotFound() {
+        // Arrange
+        Long noteId = 5L; // Non-existing note
+        when(notesRepository.findById(noteId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NoteNotFoundException.class, () -> notesService.resetLikes(noteId));
     }
 }

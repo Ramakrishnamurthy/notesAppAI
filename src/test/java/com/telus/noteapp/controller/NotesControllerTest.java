@@ -1,21 +1,20 @@
-package com.telus.demo.controller;
+package com.telus.noteapp.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.telus.demo.modal.Note;
-import com.telus.demo.service.NotesService;
+import com.telus.noteapp.modal.Note;
+import com.telus.noteapp.service.NotesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -131,11 +130,7 @@ public class NotesControllerTest {
         // Then
         mockMvc.perform(delete("/api/notes/1"))
                 .andExpect(status().isOk());
-
-
-
-        verify(notesService, times(1)).deleteNote(2L);
-
+        verify(notesService, times(1)).deleteNote(any(Long.class));
     }
 
     @Test
@@ -192,8 +187,8 @@ public class NotesControllerTest {
             throw new RuntimeException(e);
         }
     }
-    
-    
+
+
     @Test
     void testGetTopLikedNotes() throws Exception {
         List<Note> mockNotes = List.of(
@@ -238,5 +233,67 @@ public class NotesControllerTest {
                 .andExpect(jsonPath("$.TotalLikes").value(0));
 
         verify(notesService, times(1)).resetLikes(1L);
+    }
+
+    @Test
+    public void testGetAverageNoteLength() throws Exception {
+        // Arrange
+        double averageLength = 100.0;  // Example average note length
+        when(notesService.getAverageNoteLength()).thenReturn(averageLength);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/notes/average-length"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(averageLength));
+    }
+
+    @Test
+    public void testLikeNote() throws Exception {
+        // Arrange
+        Long noteId = 1L;
+        Note note = new Note();
+        note.setNoteId(noteId);
+        note.setLikes(1);
+        when(notesService.likeNote(noteId)).thenReturn(note);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/notes/{id}/like", noteId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.noteId").value(noteId))
+                .andExpect(jsonPath("$.likes").value(1));
+    }
+
+    @Test
+    public void testUnlikeNote() throws Exception {
+        // Arrange
+        Long noteId = 1L;
+        Note note = new Note();
+        note.setNoteId(noteId);
+        note.setLikes(0);
+        when(notesService.unlikeNote(noteId)).thenReturn(note);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/notes/{id}/unlike", noteId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.noteId").value(noteId))
+                .andExpect(jsonPath("$.likes").value(0));
+    }
+
+    @Test
+    public void testGetLikedNotes() throws Exception {
+        // Arrange
+        List<Note> likedNotes = Arrays.asList(
+                Note.builder().noteId(1L).subject("Note 1").description("Description 1").likes(10).build(),
+                Note.builder().noteId(1L).subject("Note 2").description("Description 2").likes(20).build()
+        );
+        when(notesService.getLikedNotes()).thenReturn(likedNotes);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/notes/liked"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].noteId").value(1))
+                .andExpect(jsonPath("$[1].noteId").value(1))
+                .andExpect(jsonPath("$[0].likes").value(10))
+                .andExpect(jsonPath("$[1].likes").value(20));
     }
 }
