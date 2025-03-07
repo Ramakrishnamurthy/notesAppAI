@@ -7,8 +7,8 @@ select n1_0.note_id,n1_0.description,n1_0.likes,n1_0.subject,n1_0.timestamp_crea
 2025-02-17 16:50:14.906288+05:30 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "NOTE" not found (this database is empty); SQL statement:
 select n1_0.note_id,n1_0.description,n1_0.likes,n1_0.subject,n1_0.timestamp_created,n1_0.timestamp_updated from note n1_0 where n1_0.note_id=? [42104-224]
-2025-02-17 16:52:01.387704+05:30 database: wrong loginUser or password; loginUser: "ROOT"
-org.h2.message.DbException: Wrong loginUser name or password [28000-224]
+2025-02-17 16:52:01.387704+05:30 database: wrong user or password; user: "ROOT"
+org.h2.message.DbException: Wrong user name or password [28000-224]
 	at org.h2.message.DbException.get(DbException.java:223)
 	at org.h2.message.DbException.get(DbException.java:199)
 	at org.h2.message.DbException.get(DbException.java:188)
@@ -59,12 +59,12 @@ org.h2.message.DbException: Wrong loginUser name or password [28000-224]
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong loginUser name or password [28000-224]
+Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong user name or password [28000-224]
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:522)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	... 50 more
-2025-02-17 18:52:44.817306+05:30 database: wrong loginUser or password; loginUser: "ROOT"
-org.h2.message.DbException: Wrong loginUser name or password [28000-224]
+2025-02-17 18:52:44.817306+05:30 database: wrong user or password; user: "ROOT"
+org.h2.message.DbException: Wrong user name or password [28000-224]
 	at org.h2.message.DbException.get(DbException.java:223)
 	at org.h2.message.DbException.get(DbException.java:199)
 	at org.h2.message.DbException.get(DbException.java:188)
@@ -115,7 +115,7 @@ org.h2.message.DbException: Wrong loginUser name or password [28000-224]
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong loginUser name or password [28000-224]
+Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong user name or password [28000-224]
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:522)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	... 50 more
