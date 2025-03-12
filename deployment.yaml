@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: noteapp-service-app
+  labels:
+    app: noteapp-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: noteapp-service-app
+  template:
+    metadata:
+      labels:
+        app: noteapp-service-app
+    spec:
+      containers:
+        - name: noteapp-service-app
+          image: gcr.io/ultimate-flare-452110-g3/noteapp:latest
+          ports:
+            - containerPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: noteapp-service-svc
+  annotations:
+    cloud.google.com/load-balancer-ipv4: "noteapp-service-external-ip"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8082
+      protocol: TCP
+  selector:
+    app: noteapp-service-app
