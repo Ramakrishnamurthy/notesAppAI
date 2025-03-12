@@ -27,12 +27,6 @@ jobs:
           distribution: 'adopt'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Echo Build Successful
-        run: echo "Build was successful!"
-
       - name: Configure Docker for GCP
         run: gcloud auth configure-docker gcr.io
 
@@ -40,6 +34,12 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Echo Build Successful
+        run: echo "Build was successful!"
 
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
