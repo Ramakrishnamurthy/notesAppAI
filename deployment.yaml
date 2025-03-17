@@ -27,9 +27,9 @@ metadata:
   annotations:
     cloud.google.com/load-balancer-ipv4: "noteapp-service-external-ip"
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
-    - port: 80
+    - port: 8082
       targetPort: 8082
       protocol: TCP
   selector:
