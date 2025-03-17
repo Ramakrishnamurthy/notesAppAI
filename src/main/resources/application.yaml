@@ -19,3 +19,11 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+  logging:
+    level:
+      com:
+        telus:
+          noteapp: TRACE
+      org:
+        springframework: TRACE
