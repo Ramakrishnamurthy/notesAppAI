@@ -1,6 +1,5 @@
 server:
   port: 8082
-
 spring:
   application:
     name: note-app
@@ -20,10 +19,27 @@ spring:
     hibernate:
       ddl-auto: update
 
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,mappings
+
 logging:
   level:
     com:
-      telus:
-        noteapp: TRACE
+      sm:
+        noteApp: TRACE
+    reactor:
+      netty:
+        http:
+          client: TRACE
     org:
-      springframework: TRACE
+      springframework:
+        web:
+          reactive: TRACE
+        cloud:
+          gateway: TRACE
