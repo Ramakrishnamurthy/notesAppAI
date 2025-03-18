@@ -4,6 +4,7 @@ import com.telus.noteapp.dao.NotesRepository;
 import com.telus.noteapp.exception.NoteNotFoundException;
 import com.telus.noteapp.modal.Note;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -59,14 +60,20 @@ public class NotesService {
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
 
+        log.info("Updating note with ID {}: {}", id, noteDetails);
+
         if (noteDetails.getSubject() != null) {
+            log.info("Updating subject of note with ID {} to {}", id, noteDetails.getSubject());
             note.setSubject(noteDetails.getSubject());
         }
         if (noteDetails.getDescription() != null) {
+            log.info("Updating description of note with ID {} to {}", id, noteDetails.getDescription());
             note.setDescription(noteDetails.getDescription());
         }
+        log.info("Updating timestamp of note with ID {}", id);
         note.setTimestampUpdated(LocalDateTime.now());  // Updating timestamp
         if (noteDetails.getLikes() > 0) {
+            log.info("Updating likes of note with ID {} to {}", id, noteDetails.getLikes());
             note.setLikes(noteDetails.getLikes());
         }
         Note updatedNote = noteRepository.save(note);
@@ -81,11 +88,19 @@ public class NotesService {
      * @throws ResponseStatusException If the note with the given ID is not found.
      */
     public void deleteNote(Long id) {
-        log.info("Deleting note with ID {}", id);
-        Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
-        noteRepository.delete(note);
-        log.info("Note with ID {} deleted successfully", id);
+        log.info("Attempting to delete note with ID {}", id);
+        try {
+            Note note = noteRepository.findById(id)
+                    .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
+            noteRepository.delete(note);
+            log.info("Note with ID {} deleted successfully", id);
+        } catch (NoteNotFoundException e) {
+            log.error("Failed to delete note with ID {}: {}", id, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("An unexpected error occurred while deleting note with ID {}: {}", id, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to delete note", e);
+        }
     }
 
     /**
@@ -98,6 +113,9 @@ public class NotesService {
         log.info("Searching notes with subject containing: {}", subject);
         List<Note> notes = noteRepository.findBySubjectContainingIgnoreCase(subject);
         log.info("Found {} notes with subject containing: {}", notes.size(), subject);
+        if (notes.isEmpty()) {
+            log.warn("No notes found with subject containing: {}", subject);
+        }
         return notes;
     }
 
@@ -110,8 +128,13 @@ public class NotesService {
      */
     public Note getNoteById(Long id) {
         log.info("Fetching note with ID {}", id);
-        return noteRepository.findById(id)
-                .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Note with ID {} not found", id);
+                    return new NoteNotFoundException("Note with ID " + id + " not found");
+                });
+        log.info("Returning note with ID {}: {}", id, note);
+        return note;
     }
 
     /**
@@ -213,7 +236,9 @@ public class NotesService {
      */
     public List<Note> getAllNotes() {
         log.info("Fetching all available notes");
-        return noteRepository.findAll();
+        List<Note> allNotes = noteRepository.findAll();
+        log.info("Found {} notes", allNotes.size());
+        return allNotes;
     }
 
 
@@ -223,10 +248,13 @@ public class NotesService {
      * @return a list of top 5 most liked notes
      */
     public List<Note> getTopLikedNotes() {
-        return noteRepository.findAll().stream()
+        log.info("Retrieving top 5 most liked notes");
+        List<Note> topLikedNotes = noteRepository.findAll().stream()
                 .sorted((n1, n2) -> Integer.compare(n2.getLikes(), n1.getLikes())) // Sort by likes in descending order
                 .limit(5)
                 .collect(Collectors.toList());
+        log.info("Returning top 5 most liked notes. Total: {}", topLikedNotes.size());
+        return topLikedNotes;
     }
 
     /**
@@ -237,10 +265,13 @@ public class NotesService {
      * @throws NoteNotFoundException if the note with the given ID is not found
      */
     public Note boostLikes(Long id) {
+        log.info("Boosting likes for note with ID {}", id);
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
         note.setLikes(note.getLikes() + 10);
-        return noteRepository.save(note);
+        Note updatedNote = noteRepository.save(note);
+        log.info("Note with ID {} boosted successfully. New like count: {}", id, updatedNote.getLikes());
+        return updatedNote;
     }
 
     /**
@@ -251,9 +282,12 @@ public class NotesService {
      * @throws NoteNotFoundException if the note with the given ID is not found
      */
     public Note resetLikes(Long id) {
+        log.info("Resetting likes for note with ID {}", id);
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " not found"));
         note.setLikes(0);
-        return noteRepository.save(note);
+        Note updatedNote = noteRepository.save(note);
+        log.info("Note with ID {} reset successfully. New like count: {}", id, updatedNote.getLikes());
+        return updatedNote;
     }
 }

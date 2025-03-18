@@ -2,6 +2,8 @@ package com.telus.noteapp.controller;
 
 import com.telus.noteapp.modal.Note;
 import com.telus.noteapp.service.NotesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ public class NotesController {
     // The service layer responsible for business logic
     private final NotesService notesService;
 
+    // Logger for this class
+    private static final Logger logger = LoggerFactory.getLogger(NotesController.class);
+
     /**
      * Constructor that initializes the controller with a NotesService.
      *
@@ -40,8 +45,10 @@ public class NotesController {
      */
     @PostMapping
     public ResponseEntity<Note> addNote(@RequestBody Note note) {
-        // Adds a note via the NotesService and responds with the created note.
-        return ResponseEntity.status(HttpStatus.CREATED).body(notesService.addNote(note));
+        logger.info("Request to add a new note: {}", note);
+        Note addedNote = notesService.addNote(note);
+        logger.info("Note added successfully: {}", addedNote);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedNote);
     }
 
     /**
@@ -53,8 +60,10 @@ public class NotesController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Note> modifyNote(@PathVariable Long id, @RequestBody Note noteDetails) {
-        // Modifies the note with the given ID and responds with the updated note.
-        return ResponseEntity.ok(notesService.modifyNote(id, noteDetails));
+        logger.info("Request to modify note with ID {}: {}", id, noteDetails);
+        Note modifiedNote = notesService.modifyNote(id, noteDetails);
+        logger.info("Note with ID {} modified successfully: {}", id, modifiedNote);
+        return ResponseEntity.ok(modifiedNote);
     }
 
     /**
@@ -65,12 +74,13 @@ public class NotesController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteNote(@PathVariable Long id) {
-        // Deletes the note with the given ID.
+        logger.info("Request to delete note with ID {}", id);
         notesService.deleteNote(id);
 
         // Preparing response indicating successful deletion
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
+        logger.info("Note with ID {} deleted successfully", id);
         return ResponseEntity.ok(response);
     }
 
@@ -82,8 +92,10 @@ public class NotesController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<Note>> searchNotesBySubject(@RequestParam String subject) {
-        // Searches for notes with a subject containing the given string and returns the list of matching notes.
-        return ResponseEntity.ok(notesService.searchNotesBySubject(subject));
+        logger.info("Request to search notes by subject: {}", subject);
+        List<Note> notes = notesService.searchNotesBySubject(subject);
+        logger.info("Found {} notes matching subject: {}", notes.size(), subject);
+        return ResponseEntity.ok(notes);
     }
 
     /**
@@ -93,8 +105,10 @@ public class NotesController {
      */
     @GetMapping
     public ResponseEntity<List<Note>> getAllNotes() {
-        // Retrieves all notes and returns them in the response.
-        return ResponseEntity.ok(notesService.getAllNotes());
+        logger.info("Request to get all notes");
+        List<Note> notes = notesService.getAllNotes();
+        logger.info("Returning {} notes", notes.size());
+        return ResponseEntity.ok(notes);
     }
 
     /**
@@ -105,8 +119,10 @@ public class NotesController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Note> getNoteById(@PathVariable Long id) {
-        // Retrieves a note by its ID and returns it in the response.
-        return ResponseEntity.ok(notesService.getNoteById(id));
+        logger.info("Request to get note with ID {}", id);
+        Note note = notesService.getNoteById(id);
+        logger.info("Returning note with ID {}: {}", id, note);
+        return ResponseEntity.ok(note);
     }
 
     /**
@@ -116,8 +132,10 @@ public class NotesController {
      */
     @GetMapping("/count")
     public ResponseEntity<Long> countTotalNotes() {
-        // Retrieves and returns the total number of notes in the system.
-        return ResponseEntity.ok(notesService.countTotalNotes());
+        logger.info("Request to get total count of notes");
+        long count = notesService.countTotalNotes();
+        logger.info("Total number of notes: {}", count);
+        return ResponseEntity.ok(count);
     }
 
     /**
@@ -128,8 +146,10 @@ public class NotesController {
      */
     @GetMapping("/word-count/{id}")
     public ResponseEntity<Integer> getWordCount(@PathVariable Long id) {
-        // Retrieves the word count of the note with the given ID.
-        return ResponseEntity.ok(notesService.getWordCount(id));
+        logger.info("Request to get word count for note with ID {}", id);
+        int wordCount = notesService.getWordCount(id);
+        logger.info("Word count for note with ID {}: {}", id, wordCount);
+        return ResponseEntity.ok(wordCount);
     }
 
     /**
@@ -139,8 +159,10 @@ public class NotesController {
      */
     @GetMapping("/average-length")
     public ResponseEntity<Double> getAverageNoteLength() {
-        // Calculates and returns the average length of all notes.
-        return ResponseEntity.ok(notesService.getAverageNoteLength());
+        logger.info("Request to get average note length");
+        double avgLength = notesService.getAverageNoteLength();
+        logger.info("Average note length: {}", avgLength);
+        return ResponseEntity.ok(avgLength);
     }
 
     /**
@@ -151,8 +173,10 @@ public class NotesController {
      */
     @PostMapping("/{id}/like")
     public ResponseEntity<Note> likeNote(@PathVariable Long id) {
-        // Increments the like count of the note with the given ID.
-        return ResponseEntity.ok(notesService.likeNote(id));
+        logger.info("Request to like note with ID {}", id);
+        Note updatedNote = notesService.likeNote(id);
+        logger.info("Note with ID {} liked successfully: {}", id, updatedNote);
+        return ResponseEntity.ok(updatedNote);
     }
 
     /**
@@ -163,8 +187,10 @@ public class NotesController {
      */
     @DeleteMapping("/{id}/unlike")
     public ResponseEntity<Note> unlikeNote(@PathVariable Long id) {
-        // Decrements the like count of the note with the given ID.
-        return ResponseEntity.ok(notesService.unlikeNote(id));
+        logger.info("Request to unlike note with ID {}", id);
+        Note updatedNote = notesService.unlikeNote(id);
+        logger.info("Note with ID {} unliked successfully: {}", id, updatedNote);
+        return ResponseEntity.ok(updatedNote);
     }
 
     /**
@@ -174,11 +200,12 @@ public class NotesController {
      */
     @GetMapping("/liked")
     public ResponseEntity<List<Note>> getLikedNotes() {
-        // Retrieves all notes that have at least one like.
-        return ResponseEntity.ok(notesService.getLikedNotes());
+        logger.info("Request to get all liked notes");
+        List<Note> likedNotes = notesService.getLikedNotes();
+        logger.info("Found {} liked notes", likedNotes.size());
+        return ResponseEntity.ok(likedNotes);
     }
-    
-    
+
     /**
      * Retrieves the top 5 most liked notes.
      *
@@ -186,10 +213,13 @@ public class NotesController {
      */
     @GetMapping("/top-liked")
     public ResponseEntity<List<Note>> getTopLikedNotes() {
-        return ResponseEntity.ok(notesService.getTopLikedNotes());
+        logger.info("Request to get top 5 liked notes");
+        List<Note> topLikedNotes = notesService.getTopLikedNotes();
+        logger.info("Returning top 5 liked notes");
+        return ResponseEntity.ok(topLikedNotes);
     }
 
-    /**̥
+    /**
      * Boosts the like count of a note by 10.
      *
      * @param id the ID of the note to boost likes
@@ -197,7 +227,9 @@ public class NotesController {
      */
     @PostMapping("/{id}/like-boost")
     public ResponseEntity<Map<String, Object>> boostLikes(@PathVariable Long id) {
+        logger.info("Request to boost likes for note with ID {}", id);
         Note updatedNote = notesService.boostLikes(id);
+        logger.info("Note with ID {} boosted successfully. New like count: {}", id, updatedNote.getLikes());
         return ResponseEntity.ok(Map.of(
                 "message", "Like Boost Activated!",
                 "TotalLikes", updatedNote.getLikes()
@@ -212,12 +244,12 @@ public class NotesController {
      */
     @DeleteMapping("/{id}/like-reset")
     public ResponseEntity<Map<String, Object>> resetLikes(@PathVariable Long id) {
+        logger.info("Request to reset likes for note with ID {}", id);
         Note updatedNote = notesService.resetLikes(id);
+        logger.info("Likes for note with ID {} reset successfully. New like count: {}", id, updatedNote.getLikes());
         return ResponseEntity.ok(Map.of(
                 "message", "All like resets",
                 "TotalLikes", updatedNote.getLikes()
         ));
     }
-    
-    
 }
